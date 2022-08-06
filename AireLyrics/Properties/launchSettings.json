@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "AireLyrics": {
+      "commandName": "Project"
+    },
+    "Profile 1": {
+      "commandName": "Project",
+      "commandLineArgs": "--artist Eminem"
+    }
+  }
+}

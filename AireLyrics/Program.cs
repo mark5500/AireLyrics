@@ -1,6 +1,8 @@
 ﻿// Set up host and register services
+using AireLyrics.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Spectre.Console;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
@@ -12,6 +14,7 @@ await BuildCommandLine()
     {
         host.ConfigureServices(services =>
         {
+            services.AddSingleton<IArtistService, FakeArtistService>();
             services.AddSingleton<App>();
         });
     })
@@ -37,11 +40,19 @@ static CommandLineBuilder BuildCommandLine()
 
 static async Task Run(string artist, IHost host)
 {
-    // Ensure that the user has entered a valid string
-    while (string.IsNullOrWhiteSpace(artist))
+    AnsiConsole.Clear();
+    AnsiConsole.Write(new FigletText("AireLyrics").Color(Color.Red));
+    AnsiConsole.MarkupLine("[gray]A tool to find the average lyric count of a music artist.[/]");
+    Console.WriteLine("");
+
+    if (string.IsNullOrWhiteSpace(artist))
     {
-        Console.WriteLine("Please specify an artist to search for.");
-        artist = Console.ReadLine();
+        // Ensure that the user has entered a valid string
+        artist = AnsiConsole.Ask<string>("\n\n\nPlease enter an [yellow]artist name[/]: ");
+    } 
+    else
+    {
+        AnsiConsole.MarkupLine("[yellow]Searching for artist:[/] [green]" + artist + "[/]");
     }
 
     var app = host.Services.GetRequiredService<App>();

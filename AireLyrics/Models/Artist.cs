@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace AireLyrics.Models
 {
-    public record Artist(string Name);
+    public record Artist(string Name, string Country);
 }

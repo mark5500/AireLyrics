@@ -14,7 +14,14 @@ await BuildCommandLine()
     {
         host.ConfigureServices(services =>
         {
-            services.AddSingleton<IArtistService, FakeArtistService>();
+            services.AddHttpClient("ArtistApi", client =>
+            {
+                client.BaseAddress = new Uri("https://musicbrainz.org/ws/2/");
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.DefaultRequestHeaders.Add("User-Agent", "AireLyrics/1.0.0 (https://github.com/mark5500)");
+            });
+            
+            services.AddSingleton<IArtistService, ArtistService>();
             services.AddSingleton<App>();
         });
     })
@@ -48,7 +55,7 @@ static async Task Run(string artist, IHost host)
     if (string.IsNullOrWhiteSpace(artist))
     {
         // Ensure that the user has entered a valid string
-        artist = AnsiConsole.Ask<string>("\n\n\nPlease enter an [yellow]artist name[/]: ");
+        artist = AnsiConsole.Ask<string>("Please enter an [yellow]artist name[/]: ");
     } 
     else
     {

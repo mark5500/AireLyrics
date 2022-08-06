@@ -4,20 +4,20 @@ namespace AireLyrics.Services;
 
 public class FakeArtistService : IArtistService
 {
-    public async Task<IEnumerable<Artist>> SearchArtistByName(string name)
+    public async Task<IEnumerable<Artist>> SearchArtistByName(string name, int maxResults)
     {
         // Simulate API call 
         await Task.Delay(1000);
 
         return new List<Artist>
         {
-            new Artist("Anne-Marie"),
-            new Artist("Ariana Grande"),
-            new Artist("Ed Sheeran"),
-            new Artist("Harry Styles"),
-            new Artist("Jason Derulo"),
-            new Artist("Little Mix"),
-            new Artist("Miley Cyrus"),
-        };
+            new Artist("Anne-Marie", "France"),
+            new Artist("Bruno Mars", "United States"),
+            new Artist("Coldplay", "British"),
+            new Artist("Ed Sheeran", "British"),
+            new Artist("Ellie Goulding", "British"),
+            new Artist("Imagine Dragons", "United States"),
+            new Artist("J. Cole", "United States")
+        }.Take(maxResults);
     }
 }

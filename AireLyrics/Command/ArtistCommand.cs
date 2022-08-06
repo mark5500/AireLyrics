@@ -44,7 +44,11 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
         PrintArtists(indexedArtists);
 
         int selectedArtistId = 0;
-        if (results.Count() > 1 && settings.Id is 0)
+        if (results.Count() is 1)
+        {
+            selectedArtistId = 1;
+        }
+        else if (results.Count() > 1 && settings.Id is 0)
         {
             selectedArtistId = AnsiConsole.Ask<int>("Please select [yellow]artist Id[/] from the list:");
         }
@@ -56,7 +60,7 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
         Artist? selectedArtist;
         if (indexedArtists.TryGetValue(selectedArtistId, out selectedArtist))
         {
-            AnsiConsole.MarkupLine($"You have selected [aqua]{selectedArtist.Name}[/]\n");
+            AnsiConsole.MarkupLine($"You have selected: [aqua]{selectedArtist.Name}[/]\n");
         }
 
         // TODO: get list of artist works

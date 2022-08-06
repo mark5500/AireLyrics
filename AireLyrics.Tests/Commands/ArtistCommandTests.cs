@@ -72,4 +72,56 @@ public class ArtistCommandTests
         var text = AnsiConsole.ExportText();
         Assert.Contains("No results, please try again.", text);
     }
+
+    [Fact]
+    public async Task Execute_IdSpecified_GetsArtist()
+    {
+        // arrange
+        var artistService = new Mock<IArtistService>();
+        artistService.Setup(c => c.SearchArtistByName(It.IsAny<string>(), 5))
+            .ReturnsAsync(_testArtists);
+        var command = new ArtistCommand(artistService.Object);
+        var context = new CommandContext(_remainingArgs, "--artist", null);
+        var settings = new ArtistCommand.ArtistSettings
+        {
+            Name = "Anne-Marie",
+            Id = 1
+        };
+        AnsiConsole.Record();
+
+        // act
+        var result = await command.ExecuteAsync(context, settings);
+
+        // assert
+        Assert.Equal(0, result);
+
+        var text = AnsiConsole.ExportText();
+        Assert.Contains("You have selected: Anne-Marie", text);
+    }
+
+    [Fact]
+    public async Task Execute_NoIdSpecified_OneResult_GetsArtist()
+    {
+        // arrange
+        var artistService = new Mock<IArtistService>();
+        artistService.Setup(c => c.SearchArtistByName(It.IsAny<string>(), 5))
+            .ReturnsAsync(new List<Artist> { new Artist("Beyonce", "United States") });
+        var command = new ArtistCommand(artistService.Object);
+        var context = new CommandContext(_remainingArgs, "--artist", null);
+        var settings = new ArtistCommand.ArtistSettings
+        {
+            Name = "Beyonce",
+            Id = 0
+        };
+        AnsiConsole.Record();
+
+        // act
+        var result = await command.ExecuteAsync(context, settings);
+
+        // assert
+        Assert.Equal(0, result);
+
+        var text = AnsiConsole.ExportText();
+        Assert.Contains("You have selected: Beyonce", text);
+    }
 }

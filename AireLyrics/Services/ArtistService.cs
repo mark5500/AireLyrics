@@ -1,11 +1,6 @@
 ﻿using AireLyrics.Models;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace AireLyrics.Services
 {
@@ -26,7 +21,7 @@ namespace AireLyrics.Services
         /// <param name="name"></param>
         /// <param name="maxResults"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<Artist>> SearchArtistByName(string name, int maxResults = 5)
+        public async Task<IEnumerable<Artist>> SearchArtistByName(string name, int maxResults = 10)
         {
             HttpClient client = _httpClientFactory.CreateClient("ArtistApi");
 

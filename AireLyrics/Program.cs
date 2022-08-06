@@ -1,67 +1,21 @@
 ﻿// Set up host and register services
+using AireLyrics.Command;
+using AireLyrics.Infrastructure;
 using AireLyrics.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Spectre.Console;
-using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.Hosting;
-using System.CommandLine.NamingConventionBinder;
-using System.CommandLine.Parsing;
+using Spectre.Console.Cli;
 
-await BuildCommandLine()
-    .UseHost(_ => Host.CreateDefaultBuilder(), host =>
-    {
-        host.ConfigureServices(services =>
-        {
-            services.AddHttpClient("ArtistApi", client =>
-            {
-                client.BaseAddress = new Uri("https://musicbrainz.org/ws/2/");
-                client.DefaultRequestHeaders.Add("Accept", "application/json");
-                client.DefaultRequestHeaders.Add("User-Agent", "AireLyrics/1.0.0 (https://github.com/mark5500)");
-            });
-            
-            services.AddSingleton<IArtistService, ArtistService>();
-            services.AddSingleton<App>();
-        });
-    })
-    .UseDefaults()
-    .Build()
-    .InvokeAsync(args);
-
-// Here we build our command line with a required artist option
-static CommandLineBuilder BuildCommandLine()
+var registrations = new ServiceCollection();
+registrations.AddHttpClient("ArtistApi", client =>
 {
-    var root = new RootCommand("Search for an artist.")
-    {
-        new Option<string>("--artist")
-        {
-            Name = "Artist",
-            Description = "The name of the artist to search for."
-        }
-    };
+    client.BaseAddress = new Uri("https://musicbrainz.org/ws/2/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.DefaultRequestHeaders.Add("User-Agent", "AireLyrics/1.0.0 (https://github.com/mark5500)");
+});
 
-    root.Handler = CommandHandler.Create<string, IHost>(Run);
-    return new CommandLineBuilder(root);
-}
+registrations.AddSingleton<IArtistService, ArtistService>();
+var registrar = new TypeRegistrar(registrations);
 
-static async Task Run(string artist, IHost host)
-{
-    AnsiConsole.Clear();
-    AnsiConsole.Write(new FigletText("AireLyrics").Color(Color.Red));
-    AnsiConsole.MarkupLine("[gray]A tool to find the average lyric count of a music artist.[/]");
-    Console.WriteLine("");
+var app = new CommandApp<ArtistCommand>(registrar);
 
-    if (string.IsNullOrWhiteSpace(artist))
-    {
-        // Ensure that the user has entered a valid string
-        artist = AnsiConsole.Ask<string>("Please enter an [yellow]artist name[/]: ");
-    } 
-    else
-    {
-        AnsiConsole.MarkupLine("[yellow]Searching for artist:[/] [green]" + artist + "[/]");
-    }
-
-    var app = host.Services.GetRequiredService<App>();
-    await app.Run(artist);
-}
+return app.Run(args);

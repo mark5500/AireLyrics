@@ -4,7 +4,7 @@ namespace AireLyrics.Services;
 
 public class FakeArtistService : IArtistService
 {
-    public async Task<IEnumerable<Artist>> SearchArtistByName(string name, int maxResults)
+    public async Task<List<Artist>> SearchArtistByName(string name, int maxResults)
     {
         // Simulate API call 
         await Task.Delay(1000);
@@ -18,6 +18,7 @@ public class FakeArtistService : IArtistService
             new Artist("Ellie Goulding", "British"),
             new Artist("Imagine Dragons", "United States"),
             new Artist("J. Cole", "United States")
-        }.Take(maxResults);
+        }.Take(maxResults)
+        .ToList();
     }
 }

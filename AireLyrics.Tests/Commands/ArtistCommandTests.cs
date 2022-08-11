@@ -9,7 +9,7 @@ namespace AireLyrics.Tests.Commands;
 
 public class ArtistCommandTests
 {
-    private readonly IEnumerable<Artist> _testArtists = new List<Artist>
+    private readonly List<Artist> _testArtists = new List<Artist>
     {
         new Artist("Anne-Marie", "France"),
         new Artist("Bruno Mars", "United States"),

@@ -18,7 +18,7 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
 
         [CommandOption("--id <ID>")]
         [Description("Artist search result Id.")]
-        public int Id { get; set; } = 0;
+        public int? Id { get; set; }
     }
 
     public ArtistCommand(IArtistService artistService)
@@ -31,36 +31,40 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
         AnsiConsole.Write(new FigletText("AireLyrics").Color(Color.Red));
 
         // index each result and print to screen
-        IEnumerable<Artist> results = await GetArtist(settings.Name);
-        var indexedArtists = results
-            .Select((artist, index) => new { artist, index })
-            .ToDictionary(x => x.index + 1, x => x.artist);
+        List<Artist> results = await GetArtist(settings.Name);
 
         if (!results.Any()) {
             AnsiConsole.MarkupLine("[red]No results, please try again.[/]\n");
             return 0;
         }
 
-        PrintArtists(indexedArtists);
+        PrintArtists(results);
 
-        int selectedArtistId = 0;
-        if (results.Count() is 1)
+        var selectedIndex = 1;
+        if (results.Count > 1) 
         {
-            selectedArtistId = 1;
-        }
-        else if (results.Count() > 1 && settings.Id is 0)
-        {
-            selectedArtistId = AnsiConsole.Ask<int>("Please select [yellow]artist Id[/] from the list:");
-        }
-        else if (results.Count() > 1 && settings.Id is not 0)
-        {
-            selectedArtistId = settings.Id;
+            // check command options or ask user for index
+            if (settings.Id is not null) 
+            {
+                selectedIndex = settings.Id.Value;
+            }
+            else 
+            {
+                selectedIndex = AnsiConsole.Ask<int>("Please select [yellow]artist id[/] from the list:");
+            }
         }
 
+        // check if given value is a valid index of results
         Artist? selectedArtist;
-        if (indexedArtists.TryGetValue(selectedArtistId, out selectedArtist))
+        if (selectedIndex >= 1 && selectedIndex < results.Count + 1)
         {
+            selectedArtist = results[selectedIndex - 1];
             AnsiConsole.MarkupLine($"You have selected: [aqua]{selectedArtist.Name}[/]\n");
+        }
+        else
+        {
+            AnsiConsole.MarkupLine("[red]Selected artist not found, please try again.[/]\n");
+            return 0;
         }
 
         // TODO: get list of artist works
@@ -74,7 +78,7 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
     /// </summary>
     /// <param name="name"></param>
     /// <returns>List of artists</returns>
-    private async Task<IEnumerable<Artist>> GetArtist(string name)
+    private async Task<List<Artist>> GetArtist(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -95,17 +99,17 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
     /// Prints a list of artists with selection Ids.
     /// </summary>
     /// <param name="artists"></param>
-    private void PrintArtists(Dictionary<int, Artist> artists)
+    private void PrintArtists(List<Artist> artists)
     {
         // display list of results for the user
         int index = 0;
         foreach (var artist in artists)
         {
             index++;
-            AnsiConsole.Markup($"   [gray]{artist.Key}.[/] [cyan]{artist.Value.Name}[/]");
+            AnsiConsole.Markup($"   [gray]{index}.[/] [cyan]{artist.Name}[/]");
 
-            if (!string.IsNullOrWhiteSpace(artist.Value.Country))
-                AnsiConsole.Markup($" [gray]({artist.Value.Country})[/]");
+            if (!string.IsNullOrWhiteSpace(artist.Country))
+                AnsiConsole.Markup($" [gray]({artist.Country})[/]");
 
             AnsiConsole.WriteLine();
         }

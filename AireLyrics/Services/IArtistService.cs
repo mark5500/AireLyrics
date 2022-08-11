@@ -4,5 +4,5 @@ namespace AireLyrics.Services;
 
 public interface IArtistService 
 {
-    Task<IEnumerable<Artist>> SearchArtistByName(string name, int maxResults = 5);
+    Task<List<Artist>> SearchArtistByName(string name, int maxResults = 5);
 }

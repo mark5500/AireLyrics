@@ -21,7 +21,7 @@ namespace AireLyrics.Services
         /// <param name="name"></param>
         /// <param name="maxResults"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<Artist>> SearchArtistByName(string name, int maxResults = 10)
+        public async Task<List<Artist>> SearchArtistByName(string name, int maxResults = 10)
         {
             HttpClient client = _httpClientFactory.CreateClient("ArtistApi");
 
@@ -38,7 +38,7 @@ namespace AireLyrics.Services
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     if (result is not null)
-                        return result.Artists;
+                        return result.Artists.ToList();
 
                 }
             }

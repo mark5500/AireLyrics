@@ -31,17 +31,17 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
         AnsiConsole.Write(new FigletText("AireLyrics").Color(Color.Red));
 
         // index each result and print to screen
-        List<Artist> results = await GetArtist(settings.Name);
+        List<Artist> artists = await SearchArtist(settings.Name);
 
-        if (!results.Any()) {
+        if (!artists.Any()) {
             AnsiConsole.MarkupLine("[red]No results, please try again.[/]\n");
             return 0;
         }
 
-        PrintArtists(results);
+        PrintArtists(artists);
 
         var selectedIndex = 1;
-        if (results.Count > 1) 
+        if (artists.Count > 1) 
         {
             // check command options or ask user for index
             if (settings.Id is not null) 
@@ -55,10 +55,10 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
         }
 
         // check if given value is a valid index of results
-        Artist? selectedArtist;
-        if (selectedIndex >= 1 && selectedIndex < results.Count + 1)
+        Artist selectedArtist;
+        if (selectedIndex >= 1 && selectedIndex < artists.Count + 1)
         {
-            selectedArtist = results[selectedIndex - 1];
+            selectedArtist = artists[selectedIndex - 1];
             AnsiConsole.MarkupLine($"You have selected: [aqua]{selectedArtist.Name}[/]\n");
         }
         else
@@ -67,7 +67,9 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
             return 0;
         }
 
-        // TODO: get list of artist works
+        var works = await GetWorksByArtistId(selectedArtist.Id);
+        AnsiConsole.MarkupLine($"Retreived list of {works.Count()} works successfully.\n");
+
         // TODO: calculate average word length of lyrics
 
         return 0;
@@ -78,21 +80,46 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
     /// </summary>
     /// <param name="name"></param>
     /// <returns>List of artists</returns>
-    private async Task<List<Artist>> GetArtist(string name)
+    private async Task<List<Artist>> SearchArtist(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
             // Ensure that the user has entered a valid string
-            name = AnsiConsole.Ask<string>("Please enter an [yellow]artist name[/]: ");
+            name = AnsiConsole.Ask<string>("Please enter an [yellow]artist name[/]:");
         }
         else
         {
-            AnsiConsole.MarkupLine("[yellow]Searching for artist:[/] [green]" + name + "[/]");
+            AnsiConsole.MarkupLine($"[yellow]Searching for artist:[/] [green]{name}[/]");
         }
 
         var results = await _artistService.SearchArtistByName(name);
 
-        return results;
+        return results.Artists;
+    }
+
+    /// <summary>
+    /// Retreives list of works matching artist Id
+    /// </summary>
+    /// <param name="artistId"></param>
+    /// <param name="batchSize"></param>
+    /// <returns>List of artists</returns>
+    private async Task<List<Work>> GetWorksByArtistId(Guid artistId, int batchSize = 100)
+    {        
+        var results = await _artistService.GetWorksByArtistId(artistId);
+     
+        List<Work> works = results.Works;
+        int totalWorks = results.WorkCount;
+     
+        AnsiConsole.MarkupLine($"[yellow]Found {results.WorkCount} works.[/]");
+
+        while (works.Count < totalWorks) 
+        {
+            AnsiConsole.MarkupLine($"[gray]Fetching batch {works.Count()}-{works.Count() + batchSize}[/]");
+            var additionalResults = await _artistService.GetWorksByArtistId(artistId, batchSize, works.Count());
+            works.AddRange(additionalResults.Works);
+        }
+        
+        return works;
     }
 
     /// <summary>

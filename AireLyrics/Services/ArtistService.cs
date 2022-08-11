@@ -21,33 +21,53 @@ namespace AireLyrics.Services
         /// <param name="name"></param>
         /// <param name="maxResults"></param>
         /// <returns></returns>
-        public async Task<List<Artist>> SearchArtistByName(string name, int maxResults = 10)
+        public async Task<SearchArtistResponse> SearchArtistByName(string name, int maxResults = 10)
         {
             HttpClient client = _httpClientFactory.CreateClient("ArtistApi");
 
-            try
+            var url = $"artist?query={name}&limit={maxResults}";
+            var response = await client.GetAsync(url);
+
+            // deserialize response on success and return list of artists
+            if (response.IsSuccessStatusCode)
             {
-                var url = $"artist?query={name}&limit={maxResults}";
-                var response = await client.GetAsync(url);
+                var content = await response.Content.ReadAsStringAsync();
+                SearchArtistResponse? result = JsonSerializer.Deserialize<SearchArtistResponse>(content, 
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                // deserialize response on success and return list of artists
-                if (response.IsSuccessStatusCode)
+                if (result is not null)
+                    return result;
+            }
+
+            return new SearchArtistResponse();
+        }
+
+        /// <summary>
+        /// Returns a list of works for given artist Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<GetWorksResponse> GetWorksByArtistId(Guid id, int limit = 100, int offset = 0)
+        {
+            HttpClient client = _httpClientFactory.CreateClient("ArtistApi");
+
+            var url = $"work?artist={id.ToString()}&limit={limit}&offset={offset}";
+            var response = await client.GetAsync(url);
+
+            // deserialize response on success and return list of artists
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                GetWorksResponse? result = JsonSerializer.Deserialize<GetWorksResponse>(content, 
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (result is not null)
                 {
-                    var content = await response.Content.ReadAsStringAsync();
-                    ArtistSearchResult? result = JsonSerializer.Deserialize<ArtistSearchResult>(content, 
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                    if (result is not null)
-                        return result.Artists.ToList();
-
+                    return result;
                 }
             }
-            catch (Exception ex)
-            {
-                _logger.LogError("An error occured when trying to connect to ArtistApi", ex);
-            }
 
-            return new List<Artist>();
+            return new GetWorksResponse();
         }
     }
 }

@@ -1,4 +1,3 @@
-﻿namespace AireLyrics.Models
-{
-    public record Artist(string Name, string Country);
-}
+﻿namespace AireLyrics.Models;
+
+public record Artist(Guid Id, string Type, string Name, string Country);

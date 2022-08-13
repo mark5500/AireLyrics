@@ -1,7 +1,6 @@
-﻿namespace AireLyrics.Models
+﻿namespace AireLyrics.Models;
+
+public class SearchArtistResponse
 {
-    public class SearchArtistResponse
-    {
-        public List<Artist> Artists { get; set; } = new List<Artist>();
-    }
+    public List<Artist> Artists { get; set; } = new List<Artist>();
 }

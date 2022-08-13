@@ -13,7 +13,14 @@ registrations.AddHttpClient("ArtistApi", client =>
     client.DefaultRequestHeaders.Add("User-Agent", "AireLyrics/1.0.0 (https://github.com/mark5500)");
 });
 
+registrations.AddHttpClient("LyricsApi", client =>
+{
+    client.BaseAddress = new Uri("https://api.lyrics.ovh/v1/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
+
 registrations.AddSingleton<IArtistService, ArtistService>();
+registrations.AddSingleton<ILyricService, LyricService>();
 var registrar = new TypeRegistrar(registrations);
 
 var app = new CommandApp<ArtistCommand>(registrar);

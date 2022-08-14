@@ -7,12 +7,10 @@ namespace AireLyrics.Services
     public class ArtistService : IArtistService
     {
         private readonly IHttpClientFactory _httpClientFactory = null!;
-        private readonly ILogger<ArtistService> _logger;
 
-        public ArtistService(IHttpClientFactory httpClientFactory, ILogger<ArtistService> logger)
+        public ArtistService(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
-            _logger = logger;
         }
 
         /// <summary>
@@ -39,7 +37,7 @@ namespace AireLyrics.Services
                     return result;
             }
 
-            return new SearchArtistResponse();
+            throw new ArgumentException("Invalid artist name");
         }
 
         /// <summary>

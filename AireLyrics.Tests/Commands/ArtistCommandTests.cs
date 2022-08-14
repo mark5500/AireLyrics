@@ -1,7 +1,6 @@
 using AireLyrics.Command;
 using AireLyrics.Models;
 using AireLyrics.Services;
-using Moq;
 using Spectre.Console;
 using Spectre.Console.Cli;
 

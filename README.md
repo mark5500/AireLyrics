@@ -1,4 +1,6 @@
 # AireLyrics
+[![.NET](https://github.com/mark5500/AireLyrics/actions/workflows/dotnet.yml/badge.svg)](https://github.com/mark5500/AireLyrics/actions/workflows/dotnet.yml)
+
 This is a technical excercise to produce a CLI application which, when given the name of an artist will produce the average (mean) number of words in their songs.
 
 ## Getting Started

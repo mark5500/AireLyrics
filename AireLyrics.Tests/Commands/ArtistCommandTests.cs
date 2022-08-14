@@ -11,13 +11,11 @@ public class ArtistCommandTests
 {
     private readonly List<Artist> _testArtists = new List<Artist>
     {
-        new Artist(Guid.Parse("e3d5b5ec-101a-4529-9f2d-01dca64cf44e"), "Person", "Anne-Marie", "FR"),
-        new Artist(Guid.Parse("afb680f2-b6eb-4cd7-a70b-a63b25c763d5"), "Person", "Bruno Mars", "US"),
-        new Artist(Guid.Parse("cc197bad-dc9c-440d-a5b5-d52ba2e14234"), "Group", "Coldplay", "UK"),
-        new Artist(Guid.Parse("b8a7c51f-362c-4dcb-a259-bc6e0095f0a6"), "Person", "Ed Sheeran", "UK"),
-        new Artist(Guid.Parse("33ca19f4-18c8-4411-98df-ac23890ce9f5"), "Person", "Ellie Goulding", "UK"),
-        new Artist(Guid.Parse("012151a8-0f9a-44c9-997f-ebd68b5389f9"), "Group", "Imagine Dragons", "US"),
-        new Artist(Guid.Parse("875203e1-8e58-4b86-8dcb-7190faf411c5"), "Person", "J. Cole", "US")
+        new Artist(Guid.Parse("e3d5b5ec-101a-4529-9f2d-01dca64cf44e"), "Person", "Test Artist 1", "FR"),
+        new Artist(Guid.Parse("afb680f2-b6eb-4cd7-a70b-a63b25c763d5"), "Person", "Test Artist 2", "US"),
+        new Artist(Guid.Parse("cc197bad-dc9c-440d-a5b5-d52ba2e14234"), "Group", "Test Artist 3", "UK"),
+        new Artist(Guid.Parse("b8a7c51f-362c-4dcb-a259-bc6e0095f0a6"), "Person", "Test Artist 4", "UK"),
+        new Artist(Guid.Parse("33ca19f4-18c8-4411-98df-ac23890ce9f5"), "Person", "Test Artist 5", "UK"),
     };
 
     private readonly IRemainingArguments _remainingArgs = new Mock<IRemainingArguments>().Object;
@@ -26,6 +24,18 @@ public class ArtistCommandTests
     {
         Name = "Beyonce",
         Id = 1
+    };
+    private readonly GetWorksResponse _testWorks = new GetWorksResponse
+    {
+        WorkCount = 5,
+        Works =
+        {
+            new Work("Test Song 1"),
+            new Work("Test Song 2"),
+            new Work("Test Song 3"),
+            new Work("Test Song 4"),
+            new Work("Test Song 5")
+        }
     };
 
     [Fact]
@@ -41,7 +51,11 @@ public class ArtistCommandTests
         artistService.Setup(c => c.GetWorksByArtistId(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>()))
             .ReturnsAsync(new GetWorksResponse());
 
-        var command = new ArtistCommand(artistService.Object);
+        var lyricsService = new Mock<ILyricService>();
+        lyricsService.Setup(c => c.SearchLyrics(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(new SearchLyricsResponse());
+
+        var command = new ArtistCommand(artistService.Object, lyricsService.Object);
         var context = new CommandContext(_remainingArgs, "--artist", null);
         AnsiConsole.Record();
 
@@ -49,15 +63,13 @@ public class ArtistCommandTests
         var result = await command.ExecuteAsync(context, _settings);
 
         // assert
-        Assert.Equal(0, result);
-
         var text = AnsiConsole.ExportText();
         Assert.Contains("Searching for artist: Beyonce", text);
-        Assert.Contains("   1. Anne-Marie (FR)", text);
-        Assert.Contains("   2. Bruno Mars (US)", text);
-        Assert.Contains("   3. Coldplay (UK)", text);
-        Assert.Contains("   4. Ed Sheeran (UK)", text);
-        Assert.Contains("   5. Ellie Goulding (UK)", text);
+        Assert.Contains("   1. Test Artist 1 (FR)", text);
+        Assert.Contains("   2. Test Artist 2 (US)", text);
+        Assert.Contains("   3. Test Artist 3 (UK)", text);
+        Assert.Contains("   4. Test Artist 4 (UK)", text);
+        Assert.Contains("   5. Test Artist 5 (UK)", text);
     }
 
     [Fact]
@@ -67,7 +79,12 @@ public class ArtistCommandTests
         var artistService = new Mock<IArtistService>();
         artistService.Setup(c => c.SearchArtistByName(It.IsAny<string>(), 5))
             .ReturnsAsync(new SearchArtistResponse());
-        var command = new ArtistCommand(artistService.Object);
+
+        var lyricsService = new Mock<ILyricService>();
+        lyricsService.Setup(c => c.SearchLyrics(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(new SearchLyricsResponse());
+
+        var command = new ArtistCommand(artistService.Object, lyricsService.Object);
         var context = new CommandContext(_remainingArgs, "--artist", null);
         AnsiConsole.Record();
 
@@ -75,8 +92,6 @@ public class ArtistCommandTests
         var result = await command.ExecuteAsync(context, _settings);
 
         // assert
-        Assert.Equal(0, result);
-
         var text = AnsiConsole.ExportText();
         Assert.Contains("No results, please try again.", text);
     }
@@ -86,19 +101,21 @@ public class ArtistCommandTests
     {
         // arrange
         var artistService = new Mock<IArtistService>();
-        artistService.Setup(c => c.SearchArtistByName(It.IsAny<string>(), 5))
-            .ReturnsAsync(new SearchArtistResponse {
-                Artists = _testArtists
-            });
 
+        artistService.Setup(c => c.SearchArtistByName(It.IsAny<string>(), 5))
+            .ReturnsAsync(new SearchArtistResponse { Artists = _testArtists });
         artistService.Setup(c => c.GetWorksByArtistId(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>()))
             .ReturnsAsync(new GetWorksResponse());
 
-        var command = new ArtistCommand(artistService.Object);
+        var lyricsService = new Mock<ILyricService>();
+        lyricsService.Setup(c => c.SearchLyrics(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(new SearchLyricsResponse());
+
+        var command = new ArtistCommand(artistService.Object, lyricsService.Object);
         var context = new CommandContext(_remainingArgs, "--artist", null);
         var settings = new ArtistCommand.ArtistSettings
         {
-            Name = "Anne-Marie",
+            Name = "Test Artist 1",
             Id = 1
         };
         AnsiConsole.Record();
@@ -107,10 +124,8 @@ public class ArtistCommandTests
         var result = await command.ExecuteAsync(context, settings);
 
         // assert
-        Assert.Equal(0, result);
-
         var text = AnsiConsole.ExportText();
-        Assert.Contains("You have selected: Anne-Marie", text);
+        Assert.Contains("You have selected: Test Artist 1", text);
     }
 
     [Fact]
@@ -122,18 +137,22 @@ public class ArtistCommandTests
             .ReturnsAsync(new SearchArtistResponse {
                     Artists = new List<Artist> 
                     { 
-                        new Artist(Guid.Parse("859d0860-d480-4efd-970c-c05d5f1776b8"), "Person", "Beyonce", "US") 
+                        new Artist(Guid.Parse("859d0860-d480-4efd-970c-c05d5f1776b8"), "Person", "Test Artist", "US") 
                     }
                 });
 
         artistService.Setup(c => c.GetWorksByArtistId(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>()))
             .ReturnsAsync(new GetWorksResponse());
 
-        var command = new ArtistCommand(artistService.Object);
+        var lyricsService = new Mock<ILyricService>();
+        lyricsService.Setup(c => c.SearchLyrics(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(new SearchLyricsResponse());
+
+        var command = new ArtistCommand(artistService.Object, lyricsService.Object);
         var context = new CommandContext(_remainingArgs, "--artist", null);
         var settings = new ArtistCommand.ArtistSettings
         {
-            Name = "Beyonce",
+            Name = "Test Artist 1",
             Id = 0
         };
         AnsiConsole.Record();
@@ -142,9 +161,40 @@ public class ArtistCommandTests
         var result = await command.ExecuteAsync(context, settings);
 
         // assert
-        Assert.Equal(0, result);
-
         var text = AnsiConsole.ExportText();
-        Assert.Contains("You have selected: Beyonce", text);
+        Assert.Contains("You have selected: Test Artist", text);
+    }
+
+    [Fact]
+    public async Task Execute_WithResults_CalculatesWordCount()
+    {
+        // arrange
+        var artistService = new Mock<IArtistService>();
+
+        artistService.Setup(c => c.SearchArtistByName(It.IsAny<string>(), 5))
+            .ReturnsAsync(new SearchArtistResponse { Artists = _testArtists });
+        artistService.Setup(c => c.GetWorksByArtistId(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>()))
+            .ReturnsAsync(_testWorks);
+
+        var lyricsService = new Mock<ILyricService>();
+        lyricsService.Setup(c => c.SearchLyrics(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(new SearchLyricsResponse { Lyrics = "one two three four five" });
+
+        var command = new ArtistCommand(artistService.Object, lyricsService.Object);
+        var context = new CommandContext(_remainingArgs, "--artist", null);
+        var settings = new ArtistCommand.ArtistSettings
+        {
+            Name = "Test Artist 1",
+            Id = 1,
+            SampleSize = 20
+        };
+        AnsiConsole.Record();
+
+        // act
+        var result = await command.ExecuteAsync(context, settings);
+
+        // assert
+        var text = AnsiConsole.ExportText();
+        Assert.Contains("Retrieved lyrics for 20 works by Test Artist 1. The average word count is 5.", text);
     }
 }

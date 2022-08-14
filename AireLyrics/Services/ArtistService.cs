@@ -51,7 +51,7 @@ namespace AireLyrics.Services
         {
             HttpClient client = _httpClientFactory.CreateClient("ArtistApi");
 
-            var url = $"work?artist={id.ToString()}&limit={limit}&offset={offset}";
+            var url = $"work?artist={id}&limit={limit}&offset={offset}";
             var response = await client.GetAsync(url);
 
             // deserialize response on success and return list of artists

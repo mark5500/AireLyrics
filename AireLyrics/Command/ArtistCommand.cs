@@ -37,11 +37,10 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, ArtistSettings settings)
     {
+        // ASCII Logo
         AnsiConsole.Write(new FigletText("AireLyrics").Color(Color.Red));
 
-        // index each result and print to screen
         List<Artist> artists = await SearchArtist(settings.Name);
-
         if (!artists.Any())
         {
             AnsiConsole.MarkupLine("[red]No results, please try again.[/]");
@@ -49,8 +48,8 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
         }
 
         PrintArtists(artists);
+        
         Artist? selectedArtist = GetSelectedArtist(artists, settings);
-
         if (selectedArtist is null)
         {
             AnsiConsole.MarkupLine("[red]Selected artist not found, please try again.[/]");
@@ -58,7 +57,6 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
         }
 
         var works = await GetWorksByArtistId(selectedArtist.Id, settings.SampleSize);
-
         if (!works.Any())
         {
             AnsiConsole.MarkupLine($"[red]No works found for {selectedArtist.Name}.[/]");

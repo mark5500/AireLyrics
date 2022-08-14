@@ -28,12 +28,13 @@ public class ArtistServiceTests
     {
         // arrange
         var client = SetUpArtistService();
+        var artistName = "Ed Sheeran";
 
         // act
-        var response = await client.SearchArtistByName("Ed Sheeran");
+        var response = await client.SearchArtistByName(artistName);
 
         // assert
-        Assert.True(response.Artists.Any());
+        Assert.NotEmpty(response.Artists);
     }
 
     [Fact]
@@ -47,15 +48,55 @@ public class ArtistServiceTests
     }
 
     [Fact]
-    public async Task SearchArtistByName_NotRealArtist_ReturnEmptyList()
+    public async Task SearchArtistByName_IncorrectArtistName_ReturnEmptyList()
     {
         // arrange
         var client = SetUpArtistService();
+        var artistName = "abcdefghijklmnopqrstuvwxyz";
 
         // act
-        var response = await client.SearchArtistByName("abcdefghijklmnopqrstuvwxyz");
+        var response = await client.SearchArtistByName(artistName);
 
         // assert
-        Assert.False(response.Artists.Any());
+        Assert.Empty(response.Artists);
+    }
+
+    [Fact]
+    public async Task GetWorksByArtistId_ValidArtist_ReturnResults()
+    {
+        // arrange
+        var client = SetUpArtistService();
+        var artistId = Guid.Parse("b8a7c51f-362c-4dcb-a259-bc6e0095f0a6");
+
+        // act
+        var response = await client.GetWorksByArtistId(artistId);
+
+        // assert
+        Assert.NotEmpty(response.Works);
+    }
+
+    [Fact]
+    public async Task GetWorksByArtistId_IncorrectArtistId_ReturnEmptyList()
+    {
+        // arrange
+        var client = SetUpArtistService();
+        var artistId = Guid.Parse("b8a7c51f-362c-4dcb-a265-bc6e0095f0a6");
+
+        // act
+        var response = await client.GetWorksByArtistId(artistId);
+
+        // assert
+        Assert.Empty(response.Works);
+    }
+
+    [Fact]
+    public async Task GetWorksByArtistId_InvalidGuid_ThrowException()
+    {
+        // arrange
+        var client = SetUpArtistService();
+        var artistId = Guid.Empty;
+
+        // assert
+        await Assert.ThrowsAsync<ArgumentException>(async () => await client.GetWorksByArtistId(artistId));
     }
 }

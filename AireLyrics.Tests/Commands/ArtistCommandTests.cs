@@ -17,6 +17,11 @@ public class ArtistCommandTests
         new Artist(Guid.Parse("33ca19f4-18c8-4411-98df-ac23890ce9f5"), "Person", "Test Artist 5", "UK"),
     };
 
+    private readonly List<Artist> _testArtist = new List<Artist>
+    {
+        new Artist(Guid.Parse("859d0860-d480-4efd-970c-c05d5f1776b8"), "Person", "Test Artist", "US")
+    };
+
     private readonly IRemainingArguments _remainingArgs = new Mock<IRemainingArguments>().Object;
 
     private readonly ArtistCommand.ArtistSettings _settings = new ArtistCommand.ArtistSettings
@@ -133,12 +138,7 @@ public class ArtistCommandTests
         // arrange
         var artistService = new Mock<IArtistService>();
         artistService.Setup(c => c.SearchArtistByName(It.IsAny<string>(), 5))
-            .ReturnsAsync(new SearchArtistResponse {
-                    Artists = new List<Artist> 
-                    { 
-                        new Artist(Guid.Parse("859d0860-d480-4efd-970c-c05d5f1776b8"), "Person", "Test Artist", "US") 
-                    }
-                });
+            .ReturnsAsync(new SearchArtistResponse { Artists = _testArtist });
 
         artistService.Setup(c => c.GetWorksByArtistId(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>()))
             .ReturnsAsync(new GetWorksResponse());

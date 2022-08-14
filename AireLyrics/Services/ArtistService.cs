@@ -1,4 +1,5 @@
 ﻿using AireLyrics.Models;
+using Ardalis.GuardClauses;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
@@ -21,6 +22,8 @@ namespace AireLyrics.Services
         /// <returns></returns>
         public async Task<SearchArtistResponse> SearchArtistByName(string name, int maxResults = 10)
         {
+            Guard.Against.NullOrWhiteSpace(name, nameof(name));
+            
             HttpClient client = _httpClientFactory.CreateClient("ArtistApi");
 
             var url = $"artist?query={name}&limit={maxResults}";
@@ -34,10 +37,12 @@ namespace AireLyrics.Services
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 if (result is not null)
+                {
                     return result;
+                }
             }
 
-            throw new ArgumentException("Invalid artist name");
+            return new SearchArtistResponse();
         }
 
         /// <summary>
@@ -47,6 +52,8 @@ namespace AireLyrics.Services
         /// <returns></returns>
         public async Task<GetWorksResponse> GetWorksByArtistId(Guid id, int limit = 100, int offset = 0)
         {
+            Guard.Against.Default(id, nameof(id));
+            
             HttpClient client = _httpClientFactory.CreateClient("ArtistApi");
 
             var url = $"work?artist={id}&limit={limit}&offset={offset}";

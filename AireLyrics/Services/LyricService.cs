@@ -1,6 +1,6 @@
-﻿using AireLyrics.Models;
-using Microsoft.Extensions.Logging;
-using System.Text.Json;
+﻿using System.Text.Json;
+using Ardalis.GuardClauses;
+using AireLyrics.Models;
 
 namespace AireLyrics.Services;
 
@@ -14,6 +14,9 @@ public class LyricService : ILyricService
     }
     public async Task<SearchLyricsResponse> SearchLyrics(string artistName, string songTitle)
     {
+        Guard.Against.NullOrWhiteSpace(artistName, nameof(artistName));
+        Guard.Against.NullOrWhiteSpace(songTitle, nameof(songTitle));
+        
         HttpClient client = _httpClientFactory.CreateClient("LyricsApi");
 
         var url = $"{artistName}/{songTitle}";

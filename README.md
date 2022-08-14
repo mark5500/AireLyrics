@@ -19,7 +19,7 @@ OPTIONS:
     -h, --help                       Prints help information
     -a, --artist <NAME>              Name of the artist to search lyrics for
     -s, --sampleSize <SAMPLESIZE>    The amount of works that should be sampled for calculating word count. (Default: 10)
-    -i, --id <ID>                    The search result position of artist results, if known
+    -i, --id <ID>                    The selected search result position of artist, if known.
 ```
 ## Dependencies
 ```

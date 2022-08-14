@@ -44,7 +44,7 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
         if (!artists.Any())
         {
             AnsiConsole.MarkupLine("[red]No results, please try again.[/]");
-            return 0;
+            return 1;
         }
 
         PrintArtists(artists);
@@ -53,21 +53,21 @@ public class ArtistCommand : AsyncCommand<ArtistCommand.ArtistSettings>
         if (selectedArtist is null)
         {
             AnsiConsole.MarkupLine("[red]Selected artist not found, please try again.[/]");
-            return 0;
+            return 1;
         }
 
         var works = await GetWorksByArtistId(selectedArtist.Id, settings.SampleSize);
         if (!works.Any())
         {
             AnsiConsole.MarkupLine($"[red]No works found for {selectedArtist.Name}.[/]");
-            return 0;
+            return 1;
         }
 
         AnsiConsole.MarkupLine($"Retreived list of {works.Count()} works successfully.");
 
         var averageWords = await GetAverageWordCount(selectedArtist, works, settings.SampleSize);
         AnsiConsole.MarkupLine($"[yellow]Retrieved lyrics for {settings.SampleSize} works by {selectedArtist.Name}. The average word count is {averageWords}.[/]");
-        return 1;
+        return 0;
     }
 
     /// <summary>

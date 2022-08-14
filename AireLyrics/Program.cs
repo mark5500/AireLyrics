@@ -1,5 +1,4 @@
-﻿// Set up host and register services
-using AireLyrics.Command;
+﻿using AireLyrics.Command;
 using AireLyrics.Infrastructure;
 using AireLyrics.Services;
 using Microsoft.Extensions.DependencyInjection;

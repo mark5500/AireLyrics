@@ -5,6 +5,8 @@ VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AireLyrics", "AireLyrics\AireLyrics.csproj", "{FE31DF27-5BE7-43A1-B263-CF406B9CC397}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AireLyrics.Tests", "AireLyrics.Tests\AireLyrics.Tests.csproj", "{806817DA-288E-4600-858C-A8873C0BD0C6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{FE31DF27-5BE7-43A1-B263-CF406B9CC397}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE31DF27-5BE7-43A1-B263-CF406B9CC397}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE31DF27-5BE7-43A1-B263-CF406B9CC397}.Release|Any CPU.Build.0 = Release|Any CPU
+		{806817DA-288E-4600-858C-A8873C0BD0C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{806817DA-288E-4600-858C-A8873C0BD0C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{806817DA-288E-4600-858C-A8873C0BD0C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{806817DA-288E-4600-858C-A8873C0BD0C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

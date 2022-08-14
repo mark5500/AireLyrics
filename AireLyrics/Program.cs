@@ -1,49 +1,27 @@
-﻿// Set up host and register services
+﻿using AireLyrics.Command;
+using AireLyrics.Infrastructure;
+using AireLyrics.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.Hosting;
-using System.CommandLine.NamingConventionBinder;
-using System.CommandLine.Parsing;
+using Spectre.Console.Cli;
 
-await BuildCommandLine()
-    .UseHost(_ => Host.CreateDefaultBuilder(), host =>
-    {
-        host.ConfigureServices(services =>
-        {
-            services.AddSingleton<App>();
-        });
-    })
-    .UseDefaults()
-    .Build()
-    .InvokeAsync(args);
-
-// Here we build our command line with a required artist option
-static CommandLineBuilder BuildCommandLine()
+var registrations = new ServiceCollection();
+registrations.AddHttpClient("ArtistApi", client =>
 {
-    var root = new RootCommand("Search for an artist.")
-    {
-        new Option<string>("--artist")
-        {
-            Name = "Artist",
-            Description = "The name of the artist to search for."
-        }
-    };
+    client.BaseAddress = new Uri("https://musicbrainz.org/ws/2/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.DefaultRequestHeaders.Add("User-Agent", "AireLyrics/1.0.0 (https://github.com/mark5500)");
+});
 
-    root.Handler = CommandHandler.Create<string, IHost>(Run);
-    return new CommandLineBuilder(root);
-}
-
-static async Task Run(string artist, IHost host)
+registrations.AddHttpClient("LyricsApi", client =>
 {
-    // Ensure that the user has entered a valid string
-    while (string.IsNullOrWhiteSpace(artist))
-    {
-        Console.WriteLine("Please specify an artist to search for.");
-        artist = Console.ReadLine();
-    }
+    client.BaseAddress = new Uri("https://api.lyrics.ovh/v1/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 
-    var app = host.Services.GetRequiredService<App>();
-    await app.Run(artist);
-}
+registrations.AddSingleton<IArtistService, ArtistService>();
+registrations.AddSingleton<ILyricService, LyricService>();
+var registrar = new TypeRegistrar(registrations);
+
+var app = new CommandApp<ArtistCommand>(registrar);
+
+return app.Run(args);
